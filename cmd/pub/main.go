@@ -2,12 +2,32 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/mishaRomanov/wb-l0/internal/entities"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"io"
 	"log"
 	"os"
 )
+
+// title is pretty self-explanatory
+func OpenJsonFile(name string) ([]entities.Order, error) {
+	//creating orders array
+	var orders []entities.Order
+	// opening a models file
+	file, err := os.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	//reading file to bytes
+	r, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(r, &orders)
+	return orders, nil
+}
 
 // publisher main
 func main() {
@@ -33,17 +53,15 @@ func main() {
 		log.Fatal(er)
 	}
 
-	// opening a models file
-	file, err := os.Open("model.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	//reading file to bytes
-	r, err := io.ReadAll(file)
+	//opening a file
+	orders, err := OpenJsonFile("model.json")
 	if err != nil {
 		log.Fatal(err)
 	}
 	//publishing
-	js.Publish(context.Background(), "TEST.HELLO", r)
-
+	for n := range orders {
+		d, _ := json.Marshal(orders[n])
+		js.Publish(context.Background(), "TEST.HELLO", d)
+		log.Println("Published a message number ", n)
+	}
 }

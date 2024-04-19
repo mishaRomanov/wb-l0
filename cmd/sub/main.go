@@ -30,17 +30,18 @@ func main() {
 
 	// consuming messages from jetstream
 	cc, err := consumer.Consume(func(msg jetstream.Msg) {
+		//acknowledge the message
+		msg.Ack()
 		//creating order struct
 		order := entities.Order{}
 		//unmarsharshalling json to order struct
 		err := json.Unmarshal(msg.Data(), &order)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error while parsing JSON. Might be unsupported type of information : %v\n", err)
+			return
 		}
 		//writing the data to cache
 		cache.Add(order)
-		//acknowledge the message
-		msg.Ack()
 	})
 	if err != nil {
 		log.Fatalf("Error while consuming: %v\n", err)
