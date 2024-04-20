@@ -1,0 +1,17 @@
+services:
+  nats:
+    container_name: nats
+    image: nats:latest
+    restart: always
+    command:
+      - "-js"
+    ports: [4222:4222]
+
+  db:
+    container_name: postgres
+    image: postgres:latest
+    restart: always
+    ports: [5432:5432]
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pass
