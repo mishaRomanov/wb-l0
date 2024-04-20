@@ -9,6 +9,7 @@ import (
 	"github.com/mishaRomanov/wb-l0/internal/entities"
 	"github.com/mishaRomanov/wb-l0/internal/handler"
 	"github.com/mishaRomanov/wb-l0/internal/storage/cache"
+	"github.com/mishaRomanov/wb-l0/internal/storage/postgres"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -25,8 +26,24 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error connecting to	nats server: %v\n", err)
 	}
+	log.Println("Connection to nats server successful")
+
 	// creating a new jetstream consumer
 	consumer, err := broker.CreateNewConsumer(nc)
+	if err != nil {
+		log.Fatalf("Error while creating consumer: %v\n", err)
+	}
+	log.Println("New consumer created successfully")
+
+	//connecting to postgres and creating a pgx instance
+	pgdb, err := postgres.CreateDB()
+	if err != nil {
+		log.Fatalf("Error while connecting to postgres: %v\n", err)
+	}
+
+	if err != nil {
+		log.Fatalf("Error while pinging postgres: %v\n", err)
+	}
 
 	// consuming messages from jetstream
 	cc, err := consumer.Consume(func(msg jetstream.Msg) {
@@ -43,6 +60,7 @@ func main() {
 		//writing the data to cache
 		cache.Add(order)
 	})
+
 	if err != nil {
 		log.Fatalf("Error while consuming: %v\n", err)
 	}

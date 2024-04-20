@@ -1,4 +1,4 @@
-package storage
+package cache
 
 import (
 	"github.com/mishaRomanov/wb-l0/internal/entities"

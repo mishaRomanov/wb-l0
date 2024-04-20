@@ -2,17 +2,17 @@ package handler
 
 import (
 	"encoding/json"
-	storage "github.com/mishaRomanov/wb-l0/internal/storage/cache"
+	"github.com/mishaRomanov/wb-l0/internal/storage/cache"
 	"net/http"
 )
 
 // handler struct
 type Handler struct {
-	Cache *storage.OrdersCache
+	Cache *cache.OrdersCache
 }
 
 // func that creates a new handler
-func NewHandler(inMemory *storage.OrdersCache) Handler {
+func NewHandler(inMemory *cache.OrdersCache) Handler {
 	return Handler{
 		Cache: inMemory,
 	}

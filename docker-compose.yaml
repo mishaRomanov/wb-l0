@@ -1,4 +1,5 @@
 services:
+
   nats:
     container_name: nats
     image: nats:latest
@@ -11,7 +12,10 @@ services:
     container_name: postgres
     image: postgres:latest
     restart: always
-    ports: [5432:5432]
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=pass
+      POSTGRES_DB: "testwb"
+      POSTGRES_USER: "wb_user"
+      POSTGRES_PASSWORD: "1234"
+    ports: [5432:5432]
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/1.sql
