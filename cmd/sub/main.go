@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -40,10 +41,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error while connecting to postgres: %v\n", err)
 	}
-
-	if err != nil {
-		log.Fatalf("Error while pinging postgres: %v\n", err)
-	}
+	var status string
+	pgdb.Db.QueryRow(context.Background(), "select 'postgres connection established'").Scan(&status)
+	log.Println(status)
 
 	// consuming messages from jetstream
 	cc, err := consumer.Consume(func(msg jetstream.Msg) {
@@ -59,8 +59,14 @@ func main() {
 		}
 		//writing the data to cache
 		cache.Add(order)
-	})
 
+		//writing the data to postgres
+		err = pgdb.WriteData(order)
+		if err != nil {
+			log.Printf("Error writing data to postgres: %v\n", err)
+			return
+		}
+	})
 	if err != nil {
 		log.Fatalf("Error while consuming: %v\n", err)
 	}

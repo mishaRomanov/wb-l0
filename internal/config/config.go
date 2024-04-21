@@ -4,10 +4,10 @@ import "github.com/caarlos0/env/v10"
 
 type Config struct {
 	Host     string `env:"POSTGRES_HOST" envDefault:"localhost"`
-	User     string `env:"POSTGRES_USER" envDefault:"postgres"`
-	Password string `env:"POSTGRES_PASSWORD" envDefault:"pass"`
+	User     string `env:"POSTGRES_USER" envDefault:"wb_user"`
+	Password string `env:"POSTGRES_PASSWORD" envDefault:"1234"`
 	Port     int    `env:"POSTGRES_PORT" envDefault:"5432"`
-	Db       string `env:"POSTGRES_DB" envDefault:"postgres"`
+	Db       string `env:"POSTGRES_DB" envDefault:"testwb"`
 }
 
 func InitConfig() (Config, error) {

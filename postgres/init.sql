@@ -1,8 +1,8 @@
 
 CREATE TYPE Delivery AS (
                             name varchar(50),
-                            phone varchar(12),
-                            zip varchar(8),
+                            phone varchar(20),
+                            zip varchar(15),
                             city varchar(50),
                             address varchar(100),
                             region varchar(100),

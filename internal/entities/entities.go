@@ -1,6 +1,9 @@
 package entities
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // The main order struct
 type Order struct {
@@ -31,6 +34,12 @@ type Delivery struct {
 	Email   string `json:"email"`
 }
 
+// Creates delivery string for sql insert
+func (order *Order) DeliveryString() string {
+	return fmt.Sprintf(`('%s', '%s', '%s', '%s', '%s', '%s', '%s')`,
+		order.Delivery.Name, order.Delivery.Phone, order.Delivery.Zip, order.Delivery.City, order.Delivery.Address, order.Delivery.Region, order.Delivery.Email)
+}
+
 // Payment struct
 type Payment struct {
 	Transaction  string `json:"transaction"`
@@ -43,6 +52,13 @@ type Payment struct {
 	DeliveryCost int    `json:"delivery_cost"`
 	GoodsTotal   int    `json:"goods_total"`
 	CustomFee    int    `json:"custom_fee"`
+}
+
+// Creates payment string for sql insert
+func (order *Order) PaymentString() string {
+	paymentStr := fmt.Sprintf(`('%s', '%s', '%s', '%s', %d,%d, '%s', %d,%d,%d)`,
+		order.Payment.Transaction, order.Payment.RequestID, order.Payment.Currency, order.Payment.Provider, order.Payment.Amount, order.Payment.PaymentDt, order.Payment.Bank, order.Payment.DeliveryCost, order.Payment.GoodsTotal, order.Payment.CustomFee)
+	return paymentStr
 }
 
 // Item struct
@@ -58,4 +74,19 @@ type Item struct {
 	NmID        int    `json:"nm_id"`
 	Brand       string `json:"brand"`
 	Status      int    `json:"status"`
+}
+
+func (order *Order) ItemsString() string {
+	itemsStr := `{`
+	//iterate over items array
+	for indx, item := range order.Items {
+		str := fmt.Sprintf(`{"(%d,'%s',%d,'%s','%s',%d,'%s', %d, %d,'%s', %d)"}`,
+			item.ChrtID, item.TrackNumber, item.Price, item.Rid, item.Name, item.Sale, item.Size, item.TotalPrice, item.NmID, item.Brand, item.Status)
+		if indx+1 != len(order.Items) {
+			str += ","
+		}
+		itemsStr += str
+	}
+	itemsStr += `}`
+	return itemsStr
 }
