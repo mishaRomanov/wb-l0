@@ -42,8 +42,11 @@ func main() {
 		log.Fatalf("Error while connecting to postgres: %v\n", err)
 	}
 	var status string
-	pgdb.Db.QueryRow(context.Background(), "select 'postgres connection established'").Scan(&status)
+	pgdb.Db.QueryRow(context.Background(), "select 'Postgres connection established'").Scan(&status)
 	log.Println(status)
+
+	//recovering cache from postgres
+	go cache.Recover(pgdb.Db)
 
 	// consuming messages from jetstream
 	cc, err := consumer.Consume(func(msg jetstream.Msg) {
