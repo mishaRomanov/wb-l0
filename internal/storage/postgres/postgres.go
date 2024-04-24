@@ -3,11 +3,12 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
+	//
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mishaRomanov/wb-l0/internal/config"
 	"github.com/mishaRomanov/wb-l0/internal/entities"
-	"log"
 )
 
 // Pgdb struct stands for postgres database

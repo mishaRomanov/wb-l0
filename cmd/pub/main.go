@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/mishaRomanov/wb-l0/internal/entities"
-	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/jetstream"
 	"io"
 	"log"
 	"os"
+	//
+	"github.com/mishaRomanov/wb-l0/internal/entities"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 // title is pretty self-explanatory

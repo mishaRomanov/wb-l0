@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"github.com/mishaRomanov/wb-l0/internal/storage/cache"
 	"html/template"
 	"log"
 	"net/http"
+	//
+	"github.com/mishaRomanov/wb-l0/internal/storage/cache"
 )
 
 // handler struct
