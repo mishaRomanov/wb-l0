@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
 	"github.com/mishaRomanov/wb-l0/internal/storage/cache"
+	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -20,13 +21,13 @@ func NewHandler(inMemory *cache.OrdersCache) Handler {
 
 // Handler that returns an order with the given id
 func (h *Handler) GetByID(w http.ResponseWriter, req *http.Request) {
+	log.Println("New get by id request")
 	//Only GET method is allowed
 	if req.Method != http.MethodGet {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid method. Only GET method is supported"))
 		return
 	}
-
 	//getting an id from path
 	data, exists := h.Cache.Get(req.PathValue("id"))
 	if !exists {
@@ -34,15 +35,17 @@ func (h *Handler) GetByID(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte("Order not found"))
 		return
 	}
-	//encoding map to json
-	bidata, err := json.Marshal(data)
+	tmpl, err := template.ParseFiles("/Users/misha/coding/GoProjects/wb-l0/internal/handler/template.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error while marshalling map to json"))
+		w.Write([]byte(err.Error()))
 		return
 	}
-	//writing header and actual data
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(bidata)
+	w.Header().Set("Content-Type", "text/html")
+	err = tmpl.ExecuteTemplate(w, "orders", data)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 }

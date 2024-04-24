@@ -12,25 +12,29 @@ import (
 )
 
 // title is pretty self-explanatory
-func OpenJsonFile(name string) ([]entities.Order, error) {
+func OpenJsonFile(name string) (entities.Order, error) {
 	//creating orders array
-	var orders []entities.Order
+	orders := entities.Order{}
 	// opening a models file
 	file, err := os.Open(name)
 	if err != nil {
-		return nil, err
+		return entities.Order{}, err
 	}
 	//reading file to bytes
 	r, err := io.ReadAll(file)
 	if err != nil {
-		return nil, err
+		return entities.Order{}, err
 	}
 	err = json.Unmarshal(r, &orders)
+	if err != nil {
+		log.Printf("Error unmarshaling %v\n", err)
+	}
 	return orders, nil
 }
 
 // publisher main
 func main() {
+	log.Println("Publisher service starting...")
 	//connecting to nats server
 	nc, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
@@ -59,9 +63,10 @@ func main() {
 		log.Fatal(err)
 	}
 	//publishing
-	for n := range orders {
-		d, _ := json.Marshal(orders[n])
-		js.Publish(context.Background(), "TEST.HELLO", d)
-		log.Println("Published a message number ", n)
+	d, err := json.Marshal(orders)
+	if err != nil {
+		log.Fatalf("Error marhsalling data: %v\n", err)
 	}
+	js.Publish(context.Background(), "TEST.HELLO", d)
+	log.Println("Published a message!")
 }

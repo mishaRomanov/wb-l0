@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+// The struct in which we parse the array of Item entities from Postgres
+type ParseItemsStruct struct {
+	Items [][]Item
+}
+
 // The main order struct
 type Order struct {
 	OrderUID          string `json:"order_uid"`
@@ -34,9 +39,9 @@ type Delivery struct {
 	Email   string `json:"email"`
 }
 
-// Creates delivery string for sql insert
+// Forms delivery string for sql insert
 func (order *Order) DeliveryString() string {
-	return fmt.Sprintf(`('%s', '%s', '%s', '%s', '%s', '%s', '%s')`,
+	return fmt.Sprintf("(%s,%s,%s,%s,%s,%s,%s)",
 		order.Delivery.Name, order.Delivery.Phone, order.Delivery.Zip, order.Delivery.City, order.Delivery.Address, order.Delivery.Region, order.Delivery.Email)
 }
 
@@ -54,9 +59,9 @@ type Payment struct {
 	CustomFee    int    `json:"custom_fee"`
 }
 
-// Creates payment string for sql insert
+// Forms payment string for sql insert
 func (order *Order) PaymentString() string {
-	paymentStr := fmt.Sprintf(`('%s', '%s', '%s', '%s', %d,%d, '%s', %d,%d,%d)`,
+	paymentStr := fmt.Sprintf("(%s,%s,%s,%s,%d,%d,%s,%d,%d,%d)",
 		order.Payment.Transaction, order.Payment.RequestID, order.Payment.Currency, order.Payment.Provider, order.Payment.Amount, order.Payment.PaymentDt, order.Payment.Bank, order.Payment.DeliveryCost, order.Payment.GoodsTotal, order.Payment.CustomFee)
 	return paymentStr
 }
@@ -76,11 +81,12 @@ type Item struct {
 	Status      int    `json:"status"`
 }
 
+// Forms sql query string for items
 func (order *Order) ItemsString() string {
 	itemsStr := `{`
 	//iterate over items array
 	for indx, item := range order.Items {
-		str := fmt.Sprintf(`{"(%d,'%s',%d,'%s','%s',%d,'%s', %d, %d,'%s', %d)"}`,
+		str := fmt.Sprintf(`{"(%d,%s,%d,%s,%s,%d,%s,%d,%d,%s,%d)"}`,
 			item.ChrtID, item.TrackNumber, item.Price, item.Rid, item.Name, item.Sale, item.Size, item.TotalPrice, item.NmID, item.Brand, item.Status)
 		if indx+1 != len(order.Items) {
 			str += ","

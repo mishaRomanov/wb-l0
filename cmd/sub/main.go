@@ -20,7 +20,7 @@ func main() {
 	log.Println("Consumer service starting...")
 
 	//creating in-memory storage
-	var cache = cache.New()
+	var inMemoryCache = cache.New()
 
 	//connecting to nats server
 	nc, err := nats.Connect(nats.DefaultURL)
@@ -41,12 +41,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error while connecting to postgres: %v\n", err)
 	}
+
+	//checking postgres connection
 	var status string
 	pgdb.Db.QueryRow(context.Background(), "select 'Postgres connection established'").Scan(&status)
 	log.Println(status)
 
-	//recovering cache from postgres
-	go cache.Recover(pgdb.Db)
+	//recovering cache from postgres in goroutine
+	go func() {
+		status := inMemoryCache.RecoverFromPostgres(pgdb)
+		if !status {
+			log.Fatal("Cache recovery failed")
+		}
+	}()
 
 	// consuming messages from jetstream
 	cc, err := consumer.Consume(func(msg jetstream.Msg) {
@@ -61,21 +68,25 @@ func main() {
 			return
 		}
 		//writing the data to cache
-		cache.Add(order)
-
+		ok := inMemoryCache.Add(order)
+		//if we already have the order in our memory cache
+		if !ok {
+			return
+		}
 		//writing the data to postgres
 		err = pgdb.WriteData(order)
 		if err != nil {
 			log.Printf("Error writing data to postgres: %v\n", err)
 			return
 		}
+		log.Printf("New order %s added.\n", order.OrderUID)
 	})
 	if err != nil {
 		log.Fatalf("Error while consuming: %v\n", err)
 	}
 	defer cc.Stop()
 
-	generalHandler := handler.NewHandler(cache)
+	generalHandler := handler.NewHandler(inMemoryCache)
 
 	//handler that return an order with given id
 	http.HandleFunc("/id/{id}", generalHandler.GetByID)
