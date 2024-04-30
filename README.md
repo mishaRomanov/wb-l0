@@ -1,4 +1,4 @@
-# Wildberries internship L0 assignment. A service that uses Postgres, Docker, Jetstream and Go
+# Wildberries internship L0 assignment. A service that uses Postgres, Docker, Jetstream and Go!
 ## How to run
 ### Default PG User, password and DB are set in docker-compose file
 Clone the repository to your machine: <br>``git clone https://github.com/mishaRomanov/wb-l0`` <br>
